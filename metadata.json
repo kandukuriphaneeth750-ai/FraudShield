@@ -2,5 +2,7 @@
   "name": "AegisPay Fraud Guard",
   "description": "Real-time payment fraud detection, ML risk scoring, live transaction monitoring, and fraud triage console.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

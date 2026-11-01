@@ -1,5 +1,6 @@
-import express, { Request, Response } from 'express';
-import { createServer as createViteServer } from 'vite';
+import express from 'express';
+import type { Request, Response } from 'express';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -1097,25 +1098,28 @@ export async function createServer() {
     });
   });
 
-  // Mount Vite middleware in development
-  const isProd = process.env.NODE_ENV === 'production';
-  if (!isProd) {
+  const distPath = path.resolve(__dirname, 'dist');
+  const hasDist = fs.existsSync(distPath);
+
+  if (process.env.NODE_ENV === 'production' || hasDist) {
+    // Serve static files in production
+    app.use(express.static(distPath));
+    app.get('*', (_req, res) => {
+      res.sendFile(path.resolve(distPath, 'index.html'));
+    });
+  } else {
+    // Mount Vite middleware in development
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
     app.use(vite.middlewares);
-  } else {
-    // Serve static files in production
-    app.use(express.static(path.resolve(__dirname, 'dist')));
-    app.get('*', (_req, res) => {
-      res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
-    });
   }
 
-  const PORT = 3000;
+  const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 FraudShield AI V4 Server running on http://0.0.0.0:${PORT}`);
+    console.log(`🚀 FraudShield AI V4 Server running on http://0.0.0.0:${PORT} (NODE_ENV=${process.env.NODE_ENV})`);
   });
 
   return app;
